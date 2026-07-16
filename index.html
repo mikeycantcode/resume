@@ -24,15 +24,19 @@
   .links { margin: 14px 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px 18px; }
   .item { border-top: 1px solid var(--rule); padding: 14px 0; }
   .item:last-child { border-bottom: 1px solid var(--rule); }
-  .item b { display: block; }
+  .head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .head b { display: block; }
+  .head time { color: var(--muted); font-size: 0.85rem; white-space: nowrap; }
   .item span { color: var(--muted); font-size: 0.92rem; }
+  .media { margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .media img, .media video { max-width: 100%; border-radius: 4px; border: 1px solid var(--rule); }
 </style>
 </head>
 <body>
 <main>
   <h1>Michael Hakizumwami</h1>
   <p class="muted">Software engineer — Dallas, TX</p>
-  <p>I work on platform engineering at Capital One and spend my nights post-training robot models and shipping LLM agents into production. Looking for forward-deployed / applied-AI work at a small, fast company.</p>
+  <p>Platform engineering at Capital One by day; robot post-training and production agents by night. Looking for forward-deployed / applied-AI work at a small, fast company.</p>
   <ul class="links">
     <li><a href="https://github.com/mikeycantcode">GitHub</a></li>
     <li><a href="https://linkedin.com/in/mikehakiz">LinkedIn</a></li>
@@ -42,17 +46,20 @@
 
   <h2>Selected work</h2>
   <div class="item">
-    <b>Robot Handwriting VLA</b>
-    <span>Sim-first robot-learning pipeline teaching an SO-ARM101 arm to write: MuJoCo + PPO curriculum (0.93–0.97 task success), LoRA post-training of the &pi;<sub>0.5</sub> 3B vision-language-action model, and a GRPO-style RL loop for flow-matching policies that beat the SFT ceiling 2× — at ~$7 per iteration on Modal GPUs.</span>
+    <div class="head"><b>Robot Handwriting VLA</b><time>2026</time></div>
+    <span>Taught an SO-ARM101 arm to write. MuJoCo + PPO curriculum (0.93–0.97 success), LoRA post-training of &pi;<sub>0.5</sub> (3B VLA), then a GRPO-style RL loop that beat the SFT ceiling 2× — ~$7/iteration on Modal.</span>
   </div>
   <div class="item">
-    <b>Conversational outreach platform</b>
-    <span>Python/FastAPI + Postgres system that delivered ~500K personalized touchpoints for creator clients; self-hosted quantized LLM inference (Ollama, RTX 4090s) at 50 tok/s per worker; owned the full SDLC and an 8-person remote team driving $600K in revenue.</span>
+    <div class="head"><b>kmj.partners</b><time>2024–2025</time></div>
+    <span>Conversational outreach platform for creator clients: FastAPI/Postgres, self-hosted quantized LLM inference on 4090s. ~500K personalized touchpoints; 8-person team, $600K revenue.</span>
   </div>
   <div class="item">
-    <b>Artifactory platform @ Capital One</b>
-    <span>CI/CD and artifact distribution backing 600+ applications bank-wide: cross-account production migration with live federation sync, 24/7 on-call, and triage through a 20K-developer authentication rollout.</span>
+    <div class="head"><b>Artifactory platform @ Capital One</b><time>Aug 2025–present</time></div>
+    <span>CI/CD + artifact distribution for 600+ apps bank-wide: cross-account production migration with live federation sync, 24/7 on-call.</span>
   </div>
+
+  <h2>Activity</h2>
+  <a href="https://github.com/mikeycantcode"><img src="https://ghchart.rshah.org/mikeycantcode" alt="GitHub contribution graph" style="width:100%;"></a>
 
   <h2>Stack</h2>
   <p class="muted">Python · TypeScript · Go · FastAPI · React/Vue · AWS · Kubernetes · Postgres · Modal · MuJoCo/JAX</p>
