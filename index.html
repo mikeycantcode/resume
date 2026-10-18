@@ -30,6 +30,8 @@
   .item span { color: var(--muted); font-size: 0.92rem; }
   .media { margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
   .media img, .media video { max-width: 100%; border-radius: 4px; border: 1px solid var(--rule); }
+  .stats { margin: 6px 0 0; font-size: 0.85rem; color: var(--muted); }
+  .stats b { color: var(--fg); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -130,11 +132,62 @@
     <span>CI/CD + artifact distribution for 600+ apps bank-wide: cross-account production migration with live federation sync, 24/7 on-call.</span>
   </div>
 
+  <h2>Playground</h2>
+  <div class="item">
+    <div class="head"><b>GLM-5.3-Flash speedrun</b><time>live</time></div>
+    <span>An agent edits the inference stack one small change at a time, benchmarks it on a single Modal B300, and keeps or reverts it. Goal: faster decode and lower time-to-first-token for one user, with output quality gated and every result signed. <a href="https://mikeycantcode.github.io/glm-flash-speedrun/">dashboard</a> · <a href="https://github.com/mikeycantcode/glm-flash-speedrun">code</a></span>
+    <div class="media" id="speedrun"></div>
+    <p class="stats" id="speedrun-stats">loading…</p>
+  </div>
+
   <h2>Activity</h2>
   <a href="https://github.com/mikeycantcode"><img src="https://ghchart.rshah.org/mikeycantcode" alt="GitHub contribution graph" style="width:100%;"></a>
 
   <h2>Stack</h2>
   <p class="muted">Python · TypeScript · Go · FastAPI · React/Vue · AWS · Kubernetes · Postgres · Modal · MuJoCo/JAX</p>
 </main>
+<script>
+// Live score chart for the speedrun. Data: window.SPEEDRUN from the speedrun's GitHub Pages.
+function drawSpeedrun() {
+  const D = window.SPEEDRUN, box = document.getElementById("speedrun"), stats = document.getElementById("speedrun-stats");
+  const exps = (D && D.runs || []).filter(r => r.kind === "experiment" && r.score != null);
+  if (!D || !D.baseline) { stats.textContent = "baseline run in progress…"; return; }
+
+  const W = 600, H = 200, L = 34, R = 8, T = 10, B = 26;
+  const maxX = Math.max(10, ...exps.map(r => r.id));
+  const ys = [100, ...exps.map(r => r.score)];
+  const lo = Math.floor(Math.min(...ys) / 10) * 10 - 5, hi = Math.ceil(Math.max(...ys, 110) / 10) * 10 + 5;
+  const x = i => L + (i / maxX) * (W - L - R), y = s => T + (1 - (s - lo) / (hi - lo)) * (H - T - B);
+
+  let best = 100, path = `M${x(0)},${y(100)}`;
+  for (const r of exps) if (r.decision === "KEEP") { path += `H${x(r.id)}V${y(r.score)}`; best = r.score; }
+  path += `H${x(maxX)}`;
+
+  const dots = exps.map(r => r.decision === "KEEP"
+    ? `<circle cx="${x(r.id)}" cy="${y(r.score)}" r="3.2" fill="var(--link)"/>`
+    : `<circle cx="${x(r.id)}" cy="${y(r.score)}" r="2.4" fill="none" stroke="var(--muted)" stroke-opacity=".55"/>`).join("");
+  // Skip a label when it would collide with the baseline (100) label.
+  const tick = s => s !== 100 && Math.abs(y(s) - y(100)) < 14 ? "" : `<text x="${L - 6}" y="${y(s) + 4}" text-anchor="end">${s}</text>`;
+
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;font-family:inherit" role="img" aria-label="Speedrun score by experiment">
+    <g font-size="10" fill="var(--muted)">${tick(lo + 5)}${tick(100)}${tick(hi - 5)}
+      <text x="${L}" y="${H - 6}">0</text><text x="${W - R}" y="${H - 6}" text-anchor="end">experiment ${maxX}</text></g>
+    <line x1="${L}" x2="${W - R}" y1="${y(100)}" y2="${y(100)}" stroke="var(--rule)" stroke-dasharray="4 4"/>
+    <line x1="${L}" x2="${L}" y1="${T}" y2="${H - B}" stroke="var(--rule)"/>
+    <line x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}" stroke="var(--rule)"/>
+    ${dots}<path d="${path}" fill="none" stroke="var(--link)" stroke-width="1.6"/></svg>`;
+
+  const keep = [...exps].reverse().find(r => r.decision === "KEEP");
+  const b = D.baseline, pct = (a, c) => `${a >= c ? "+" : "−"}${Math.abs((a / c - 1) * 100).toFixed(0)}%`;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  stats.innerHTML = `score <b>${best.toFixed(1)}</b> (baseline 100)` +
+    (keep ? ` · <b>${keep.tps.toFixed(0)}</b> tok/s ${pct(keep.tps, b.tps)} · TTFT <b>${keep.ttft_ms.toFixed(0)} ms</b> ${pct(keep.ttft_ms, b.ttft_ms)}`
+          : ` · ${b.tps.toFixed(0)} tok/s · TTFT ${b.ttft_ms.toFixed(0)} ms`) +
+    ` · ${exps.length} runs, ${exps.filter(r => r.decision === "KEEP").length} kept` +
+    (keep ? `<br>latest win: ${esc(keep.message)}` : "");
+}
+</script>
+<script src="https://mikeycantcode.github.io/glm-flash-speedrun/data.js" onload="drawSpeedrun()"
+        onerror="document.getElementById('speedrun-stats').textContent='baseline run in progress…'"></script>
 </body>
 </html>
